@@ -2,15 +2,14 @@ module.exports =  async function routes(fastify, options){
     fastify.register(require('fastify-websocket'))
 
     const broadcast = (...args) =>
-        fastify.websocketServer.clients.forEach(client => {
+        {for(let client of fastify.websocketServer.clients){
             client.send(...args);
-        });
+        }};
 
     //VIDEO
     const VideoCapture = require('camera-capture').VideoCapture;
     const CAM = new VideoCapture();
     CAM.addFrameListener(frame => {
-        //console.log(new Uint8ClampedArray(frame.data));
         broadcast(frame.data, {binary:true, compress:true});
     });
     CAM.start();
@@ -23,7 +22,12 @@ module.exports =  async function routes(fastify, options){
         conn.socket.send(JSON.stringify(CAM.o)); //width, height
 
         conn.socket.on('message', message => {
-            //...
+            let msg = JSON.parse(message);
+            switch(msg.cmd){
+                case "rotate_speed":
+                    fastify.log.info("rotating: ", msg.x, msg.y);
+                    break;
+            }
         })
     })
 }

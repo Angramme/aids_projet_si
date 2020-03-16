@@ -1,7 +1,8 @@
 {
   "name": "aids_projet_si",
   "config": {
-    "debug": true
+    "debug": true,
+    "stream":false
   },
   "version": "1.0.0",
   "description": "aids",

@@ -8,6 +8,7 @@ const fastify = require('fastify')({
 
 
 //streaming server
+if(config.stream)
 fastify.register(require('./stream.js'),{
   prefix:'/ws',
 });
