@@ -1,10 +1,11 @@
 
-const ws = new WebSocket('ws://localhost:3000/ws/123');
+const ws = new WebSocket(`ws://${window.location.host}/ws/123`);
+
+ws.addEventListener('error', console.log);
 
 ws.addEventListener('open', function (event) {
     console.log('%c successfully connected to server!!!', 
         'color:green; background:white');
-    return false;
 });
 
 new Promise((resolve, reject)=>{
