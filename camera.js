@@ -3,9 +3,25 @@ const CAM = new VideoCapture();
 CAM.start();
 CAM.pause();
 
+const sharp = require('sharp');
+
 module.exports.onframe = broadcast=>{
     CAM.addFrameListener(frame => {
-        broadcast(frame.data);
+        sharp(frame.data, {
+            raw:{
+                width:this.size.width,
+                height:this.size.height,
+                channels:4,
+            }
+        })
+        .jpeg({
+            quality:10,
+        })
+        .toBuffer()
+        .then(broadcast)
+        .catch(err=>console.log('ERROR(sharp):', err))
+
+        //broadcast(frame.data);
     });
 }
 

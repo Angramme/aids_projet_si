@@ -12,18 +12,27 @@ new Promise((resolve, reject)=>{
     }, {once:true});
 })
 .then(cam=>{
-    const CAN = document.getElementById('vidcan');
+    /*const CAN = document.getElementById('vidcan');
     const CTX = CAN.getContext('2d');
 
     CAN.width = cam.width;
     CAN.height = cam.height;
+    */
+
+    const CAN = document.getElementById('vidcan');
+    let urlObject;
 
     ws.addEventListener('message', event=>{
-        event.data.arrayBuffer()
+        /*event.data.arrayBuffer()
         .then(buffer=>new Uint8ClampedArray(buffer))
         .then(buffer=>new ImageData(buffer, cam.width, cam.height))
         .then(imgdata=>CTX.putImageData(imgdata, 0, 0))
         .then(_=>ui_overlay(CTX))
+        */
+        const arrayBuffer = event.data;
+        if (urlObject) URL.revokeObjectURL(urlObject)
+        urlObject = URL.createObjectURL(new Blob([arrayBuffer]));
+        CAN.src = urlObject;
     });
 
     setInterval(e=>{

@@ -2,14 +2,15 @@
   "name": "aids_projet_si",
   "config": {
     "debug": true,
-    "stream":true
+    "stream": true
   },
   "version": "1.0.0",
   "description": "aids",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "expose": "ngrok http 3000"
   },
   "author": "Kacper Ozieblowski",
   "license": "ISC",
@@ -23,6 +24,7 @@
     "fastify-static": "^2.6.0",
     "fastify-websocket": "^1.1.1",
     "pino-pretty": "^3.6.1",
-    "puppeteer": "^2.1.1"
+    "puppeteer": "^2.1.1",
+    "sharp": "^0.25.1"
   }
 }
