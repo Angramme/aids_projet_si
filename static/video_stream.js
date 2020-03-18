@@ -12,15 +12,14 @@ new Promise((resolve, reject)=>{
     }, {once:true});
 })
 .then(cam=>{
-    /*const CAN = document.getElementById('vidcan');
+    const CAN = document.getElementById('vidcan');
     const CTX = CAN.getContext('2d');
 
     CAN.width = cam.width;
     CAN.height = cam.height;
-    */
-
-    const CAN = document.getElementById('vidcan');
+    
     let urlObject;
+    let image = document.createElement('img');
 
     ws.addEventListener('message', event=>{
         /*event.data.arrayBuffer()
@@ -32,8 +31,15 @@ new Promise((resolve, reject)=>{
         const arrayBuffer = event.data;
         if (urlObject) URL.revokeObjectURL(urlObject)
         urlObject = URL.createObjectURL(new Blob([arrayBuffer]));
-        CAN.src = urlObject;
+        image.src = urlObject;
     });
+
+    function ui_loop(){
+        CTX.drawImage(image, 0, 0);
+        ui_overlay(CTX);
+        requestAnimationFrame(ui_loop);
+    }
+    ui_loop();
 
     setInterval(e=>{
         if(!gmousedown)return;
@@ -43,7 +49,6 @@ new Promise((resolve, reject)=>{
     }, 500);
 })
 
-
 function ui_overlay(ctx){
     let w = ctx.canvas.width;
     let h = ctx.canvas.height;
@@ -51,13 +56,13 @@ function ui_overlay(ctx){
     mx = mx*w - w/2;
     my = my*h - h/2;
 
-    ctx.resetTransform();
     ctx.translate(w/2, h/2);
 
     let a = Math.atan2(my, mx);
     let r = Math.sqrt(mx*mx+my*my);
 
-    ctx.strokeStyle = "rgba(255, 255, 255, "+r/h+")";
+    //ctx.strokeStyle = "rgba(255, 255, 255, "+r/h+")";
+    ctx.strokeStyle = 'white';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(mx, my);
@@ -73,4 +78,6 @@ function ui_overlay(ctx){
     ctx.lineTo(mx, my);
     ctx.setLineDash([2, 5]);
     ctx.stroke();
+
+    ctx.resetTransform();
 }

@@ -3,6 +3,7 @@ const CAM = new VideoCapture();
 CAM.start();
 CAM.pause();
 
+//for compression
 const sharp = require('sharp');
 
 module.exports.onframe = broadcast=>{
@@ -11,12 +12,15 @@ module.exports.onframe = broadcast=>{
             raw:{
                 width:this.size.width,
                 height:this.size.height,
-                channels:4,
+                channels:4, //rgba
             }
         })
-        .jpeg({
-            quality:10,
+        //.flatten() //remove alpha
+        .webp({ //more comrpession than jpeg
+            quality:60,
+            alphaQuality:0,
         })
+        .removeAlpha()
         .toBuffer()
         .then(broadcast)
         .catch(err=>console.log('ERROR(sharp):', err))
