@@ -19,10 +19,7 @@ module.exports =  fp(async function routes(fastify, options){
     
 
     //in memory database (bad) but I won't have thousands of clients at once plus it is faster.
-    const UserCredentials = {
-        admin:{ pwd:"yes123" },
-        invite:{ pwd:"salut" },
-    }
+    const UserCredentials = require('./UserCredentials.json');
     const session_expire_time = 0.5*60e3; //0.5min
     let active_sessions = {};
     active_sessions.add = (id, name)=>{

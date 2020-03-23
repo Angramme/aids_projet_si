@@ -5,7 +5,8 @@
     "stream": true,
     "camera_backend": "opencv",
     "camera_fps": 24,
-    "camera_opencv_driver":"CAP_DSHOW"
+    "camera_opencv_driver":"CAP_DSHOW",
+    "camera_opencv_headless":true
   },
   "version": "1.0.0",
   "description": "aids",
