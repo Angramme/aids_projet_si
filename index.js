@@ -7,7 +7,7 @@ const fastify = require('fastify')({
 });
 
 
-//streaming server
+//streaming routes
 if(config.stream)
 fastify.register(require('./stream.js'),{
   prefix:'/ws',
@@ -20,11 +20,19 @@ fastify.register(require('fastify-static'), {
   prefix: '/public/', // optional: default '/'
 })
 
-// home page
-fastify.get('/', function (request, reply) {
-  //reply.send({ hello: 'world' })
-  reply.sendFile('index.html');
-})
+
+//authentication routes
+fastify.register(require('./login.js'));
+
+fastify.register(async (fastify)=>{
+  fastify.addHook('preHandler', fastify.authenticate);
+
+  // home page
+  fastify.get('/', function (request, reply) {
+    reply.sendFile('index.html');
+  });
+
+});
 
 
 // Run the server!

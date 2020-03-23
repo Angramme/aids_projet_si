@@ -17,7 +17,7 @@ module.exports.onframe = broadcast=>{
         })
         //.flatten() //remove alpha
         .webp({ //more comrpession than jpeg
-            quality:60,
+            quality:80,
             alphaQuality:0,
         })
         .removeAlpha()

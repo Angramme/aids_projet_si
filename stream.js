@@ -5,7 +5,7 @@ module.exports =  async function routes(fastify, options){
     const camera = require('./camera.js');
     camera.onframe(data=>{
         for(let client of fastify.websocketServer.clients){
-            client.send(data, {binary:true, compress:true});
+            client.send(data, {binary:true, compress:false});
         }
     });
     const update_usercount = (()=>{
@@ -18,24 +18,33 @@ module.exports =  async function routes(fastify, options){
     })();
 
     //websocket stuff
-    fastify.get('/:user', { websocket: true }, (conn, req, params) => {
-        fastify.log.info('new socket connection - user:'+params.user);
+    const cryptoRandomString = require('crypto-random-string');
+    let session_tokens = {};
+    fastify.get('/connect', (req, rep)=>{
+        if(!fastify.active_sessions.check(req.session.sessionId)){
+            rep.redirect(401);
+        }else{
+            let token = cryptoRandomString({length: 32, type: 'url-safe'});
+            session_tokens[token] = true;
+            setTimeout(()=>delete session_tokens[token], 5000); //delete in 5 seconds
+            rep.send(options.prefix+'/'+token); //on-time-use connection url
+        }
+    });
+    fastify.get('/:token', { websocket: true }, (conn, req, params) => {
+        if(!session_tokens[params.token]){
+            fastify.log.info("socket connection rejected!")
+            return conn.socket.close();
+        }
+        delete session_tokens[params.token];
+
+        fastify.log.info('new socket connection');
 
         update_usercount(1);
         conn.socket.on('close', ()=>{
-            fastify.log.info('socket disconnected - user:'+params.user);
+            fastify.log.info('socket disconnected');
             update_usercount(-1);
         });
 
         conn.socket.send(JSON.stringify(camera.size));
-
-        conn.socket.on('message', message => {
-            let msg = JSON.parse(message);
-            switch(msg.cmd){
-                case "rotate_speed":
-                    fastify.log.info("rotating: ", msg.x, msg.y);
-                    break;
-            }
-        })
     })
 }

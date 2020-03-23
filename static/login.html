@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>AIDSv1.0-client login</title>
+        <link rel="icon" href="/public/icon.png">
+        <style>
+            body{
+                width: 100vw;
+                height: 100vh;
+                margin: 0;
+                position: relative;
+                font-family: "Courier New", Courier, serif;
+            }
+            input, h1{
+                display: block;
+                margin: 15px auto;
+            }
+            form {
+                width:100vw;
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+
+                -webkit-box-shadow: 5px 9px 77px -15px rgba(0,0,0,0.61);
+                -moz-box-shadow: 5px 9px 77px -15px rgba(0,0,0,0.61);
+                box-shadow: 5px 9px 77px -15px rgba(0,0,0,0.61);
+            }
+            h1{
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <form action="auth" method="POST">
+            <h1>Login</h1>
+            <input type="text" name="username" placeholder="utilisateur" required>
+            <input type="password" name="password" placeholder="mot de passe" required>
+            <input type="submit">
+        </form>
+    </body>
+</html>
