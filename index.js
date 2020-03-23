@@ -11,6 +11,7 @@ const fastify = require('fastify')({
 if(config.stream)
 fastify.register(require('./stream.js'),{
   prefix:'/ws',
+  camera_backend:config.camera_backend
 });
 
 
@@ -36,7 +37,7 @@ fastify.register(async (fastify)=>{
 
 
 // Run the server!
-fastify.listen(3000, '0.0.0.0', function (err, address) {
+fastify.listen(4000, '0.0.0.0', function (err, address) {
   if (err) {
     fastify.log.error(err)
     process.exit(1)

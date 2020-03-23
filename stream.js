@@ -2,7 +2,8 @@ module.exports =  async function routes(fastify, options){
     fastify.register(require('fastify-websocket'))
 
     //VIDEO
-    const camera = require('./camera.js');
+    if(!options.camera_backend)throw new Error('Camera backend not specified!!!: possible values: "opencv" "puppeteer"');
+    const camera = require(`./camera-${options.camera_backend}.js`);
     camera.onframe(data=>{
         for(let client of fastify.websocketServer.clients){
             client.send(data, {binary:true, compress:false});
