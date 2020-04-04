@@ -10,16 +10,23 @@
                 margin: 0;
                 position: relative;
                 font-family: "Courier New", Courier, serif;
+
+                background-image: url("public/background.png");
+                background-repeat: repeat;
             }
-            input, h1{
+            input, h1, p{
                 display: block;
-                margin: 15px auto;
+                margin: 15px;
             }
             form {
-                width:100vw;
+                padding: 5px;
+
                 position: absolute;
                 top: 50%;
-                transform: translateY(-50%);
+                left: 50%;
+                transform: translate(-50%, -50%);
+
+                background:white;
 
                 -webkit-box-shadow: 5px 9px 77px -15px rgba(0,0,0,0.61);
                 -moz-box-shadow: 5px 9px 77px -15px rgba(0,0,0,0.61);
@@ -32,7 +39,8 @@
     </head>
     <body>
         <form action="auth" method="POST">
-            <h1>Login</h1>
+            <h1>AIDSv1.0</h1>
+            <p>Login:</p>
             <input type="text" name="username" placeholder="utilisateur" required>
             <input type="password" name="password" placeholder="mot de passe" required>
             <input type="submit">

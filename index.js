@@ -18,21 +18,30 @@ fastify.register(require('./stream.js'),{
 //static 
 fastify.register(require('fastify-static'), {
   root: path.join(__dirname, 'static'),
-  prefix: '/public/', // optional: default '/'
-})
+  prefix: '/public/',
+});
 
 
 //authentication routes
 fastify.register(require('./login.js'));
 
 fastify.register(async (fastify)=>{
-  fastify.addHook('preHandler', fastify.authenticate);
+  fastify.addHook('preHandler', fastify.auth_redirect);
 
   // home page
   fastify.get('/', function (request, reply) {
     reply.sendFile('index.html');
   });
 
+});
+
+if(config.is_raspberry)
+fastify.register(async (fastify)=>{
+  fastify.addHook('preHandler', fastify.auth_reject);
+
+  fastify.register(require('./rest-rotate.js'), {
+    prefix:'/cam'
+  });
 });
 
 

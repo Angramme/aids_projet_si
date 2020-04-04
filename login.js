@@ -1,7 +1,7 @@
 const fp = require('fastify-plugin');
+const cryptoRandomString = require('crypto-random-string');
 
 module.exports =  fp(async function routes(fastify, options){
-    const cryptoRandomString = require('crypto-random-string');
 
     fastify.register(require('fastify-formbody'))
     fastify.register(require('fastify-cookie'));
@@ -40,8 +40,11 @@ module.exports =  fp(async function routes(fastify, options){
     }
 
     fastify.decorate('active_sessions', active_sessions);
-    fastify.decorate('authenticate', async (req, rep)=>{
+    fastify.decorate('auth_redirect', async (req, rep)=>{
         return active_sessions.check(req.session.sessionId) ? null : rep.redirect('/login');
+    });
+    fastify.decorate('auth_reject', async (req, rep)=>{
+        return active_sessions.check(req.session.sessionId) ? null : rep.redirect(403);
     });
 
     fastify.post('/session/bump', async (req, rep)=>{

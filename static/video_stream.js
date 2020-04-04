@@ -1,3 +1,5 @@
+const CAN = document.getElementById('vidcan');
+const CTX = CAN.getContext('2d');
 
 fetch(`http://${window.location.host}/ws/connect`)
 .then(res=>{
@@ -18,8 +20,6 @@ fetch(`http://${window.location.host}/ws/connect`)
         }, {once:true});
     })
     .then(cam=>{
-        const CAN = document.getElementById('vidcan');
-        const CTX = CAN.getContext('2d');
         
         CAN.width = cam.width;
         CAN.height = cam.height;
@@ -36,46 +36,49 @@ fetch(`http://${window.location.host}/ws/connect`)
         
         function ui_loop(){
             CTX.drawImage(image, 0, 0);
-            //ui_overlay(CTX);
+            ui_overlay(CTX);
             requestAnimationFrame(ui_loop);
         }
         ui_loop();
-        
-        setInterval(e=>{
-            if(!gmousedown)return;
-            ws.send(JSON.stringify({
-                ...relmouseN(CAN), cmd:"rotate_speed",
-            }))
-        }, 500);
-    })
-    
+    });
 })
+
+let p1 = null;
+CAN.addEventListener('mousedown', ()=>{
+    p1 = relmouseN(CAN);
+    CAN.addEventListener('mouseup', ()=>{
+        let p2 = relmouseN(CAN);
+        fetch('/cam', {
+            method: 'POST',
+            mode: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            redirect: 'error', // manual, *follow, error
+            body: JSON.stringify({
+                type:"rotate-by",
+                x: p2.x-p1.x,
+                y: p2.y-p1.y,
+            })
+        })
+        .catch(err=>{
+            console.error('cannot rotate!: ', err);
+        })
+    }, {once:true});
+});
 function ui_overlay(ctx){
+    if(!gmousedown)return;
+
     let w = ctx.canvas.width;
     let h = ctx.canvas.height;
-    let {x:mx, y:my} = relmouseN(ctx.canvas);
-    mx = mx*w - w/2;
-    my = my*h - h/2;
+    let {x:mx, y:my} = relmouse(ctx.canvas);
+    mx = mx*w;
+    my = my*h;
     
-    ctx.translate(w/2, h/2);
-    
-    let a = Math.atan2(my, mx);
-    let r = Math.sqrt(mx*mx+my*my);
-    
-    //ctx.strokeStyle = "rgba(255, 255, 255, "+r/h+")";
     ctx.strokeStyle = 'white';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(mx, my);
-    let da = 10/r;
-    ctx.lineTo(Math.cos(a-da)*(r-10),Math.sin(a-da)*(r-10));
-    ctx.lineTo(Math.cos(a+da)*(r-10),Math.sin(a+da)*(r-10));
-    ctx.closePath();
-    ctx.setLineDash([]);
-    ctx.stroke();
-    
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
+    ctx.moveTo(p1.x, p1.y);
     ctx.lineTo(mx, my);
     ctx.setLineDash([2, 5]);
     ctx.stroke();
