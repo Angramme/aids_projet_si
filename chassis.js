@@ -25,7 +25,7 @@ class MotionController{
         this.a = this.x < this.target ? this.maxa : -this.maxa;
     }
     move_by(nx){
-        this.target = clamp(this.x + nx, 0, 6.28318);;
+        this.target = clamp(this.x + nx, 0, 6.28318);
         this.a = this.x < this.target ? this.maxa : -this.maxa;
     }
     update(dt){

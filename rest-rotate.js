@@ -9,7 +9,7 @@ const pos_body = {
     }
   };
 
-module.exports = function(fastify, opts){
+module.exports = function(fastify, opts, done){
     // manual rotation
     fastify.post('/rotate-by', { body: pos_body },
     (req, rep)=>{
@@ -22,4 +22,6 @@ module.exports = function(fastify, opts){
       chassis.rotate_to(req.body.x, req.body.y);
       rep.redirect(200);
     });
+
+    done();
 }

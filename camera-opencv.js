@@ -75,8 +75,10 @@ module.exports.onframe = broadcast=>{
 
 module.exports.streamnow = v=>{
     if(v && paused){
+        paused = false;
         intervalID = setInterval(loop, 1000/FPS) //24 fps
     }else if(!v && !paused){
+        paused = true;
         if(!intervalID)throw new Error("intervalID not defined!!!");
         clearInterval(intervalID);
     }
