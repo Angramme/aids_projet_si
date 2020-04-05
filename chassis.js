@@ -1,3 +1,7 @@
+function clamp(x, min, max){
+    return x < min ? min : (x > max ? max : x);
+}
+
 class MotionController{
     constructor(){
         this.x = 0;
@@ -17,11 +21,11 @@ class MotionController{
         return A*extremum_x*extremum_x + B*extremum_x + C;
     }
     go_to(nx){
-        this.target = nx;
+        this.target = clamp(nx, 0, 6.28318);
         this.a = this.x < this.target ? this.maxa : -this.maxa;
     }
     move_by(nx){
-        this.target = this.x + nx;
+        this.target = clamp(this.x + nx, 0, 6.28318);;
         this.a = this.x < this.target ? this.maxa : -this.maxa;
     }
     update(dt){
