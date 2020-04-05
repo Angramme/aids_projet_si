@@ -35,7 +35,6 @@ fastify.register(async (fastify)=>{
 
 });
 
-if(config.is_raspberry)
 fastify.register(async (fastify)=>{
   fastify.addHook('preHandler', fastify.auth_reject);
 

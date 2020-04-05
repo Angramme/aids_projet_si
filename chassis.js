@@ -22,6 +22,7 @@ class MotionController{
     }
     move_by(nx){
         this.target = this.x + nx;
+        this.a = this.x < this.target ? this.maxa : -this.maxa;
     }
     update(dt){
         if(Math.abs(this.x-this.target) > 0.01){
@@ -54,36 +55,40 @@ function to_axis(x, y){
     };
 }
 
-module.exports.rotate_to = (x, y)=>{
-    let target = to_axis(x, y);
-    motor_a.go_to(target.x);
-    motor_b.go_to(target.y);
-};
-
 module.exports.rotate_by = (x, y)=>{
     let add = to_axis(x, y);
     motor_a.move_by(add.x);
     motor_b.move_by(add.y);
 };
 
+module.exports.rotate_to = (x, y)=>{
+    let target = to_axis(x, y);
+    motor_a.go_to(target.x);
+    motor_b.go_to(target.y);
+};
 
-const raspi = require('raspi');
-const pwm = require('raspi-pwm');
 
-let pwm_a = null;
-let pwm_b = null;
- 
-raspi.init(() => {
-  pwm_a = new pwm.PWM('P1-12');
-  pwm_b = new pwm.PWM('GPIO19');
-});
+const config = require('./package.json').config;
 
-function update(){
-    motor_a.update(100);
-    motor_b.update(100);
-
-    pwm_a.write(motor_a.x/6.28318);
-    pwm_b.write(motor_b.x/6.28318);
+if(config.is_raspberry){
+    const raspi = require('raspi');
+    const pwm = require('raspi-pwm');
+    
+    let pwm_a = null;
+    let pwm_b = null;
+    
+    function update(){
+        motor_a.update(100);
+        motor_b.update(100);
+    
+        pwm_a.write(motor_a.x/6.28318);
+        pwm_b.write(motor_b.x/6.28318);
+    }
+    
+    raspi.init(() => {
+        pwm_a = new pwm.PWM(config.servo1_pin);
+        pwm_b = new pwm.PWM(config.servo2_pin);
+        setInterval(update, 100);
+    });
 }
-
-setInterval(update, 100);
+    
