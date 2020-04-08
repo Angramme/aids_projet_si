@@ -4,33 +4,20 @@ module.exports =  async function routes(fastify, options){
     //VIDEO
     if(!options.camera_backend)throw new Error('Camera backend not specified!!!: possible values: "opencv" "puppeteer"');
     const camera = require(`./camera-${options.camera_backend}.js`);
-    camera.onframe(data=>{
-        for(let client of fastify.websocketServer.clients){
-            client.send(data, {binary:true, compress:false});
-        }
-    });
-    const update_usercount = (()=>{
-        let user_count = 0;
-        return function(add){
-            user_count += add;
-            fastify.log.info('streaming: ', user_count>0)
-            camera.streamnow(user_count>0);
-        }
-    })();
-
+    
     //websocket stuff
     const cryptoRandomString = require('crypto-random-string');
     let session_tokens = {};
-    fastify.get('/connect', (req, rep)=>{
-        if(!fastify.active_sessions.check(req.session.sessionId)){
-            rep.redirect(401);
-        }else{
+    fastify.register(async (fastify)=>{
+        fastify.addHook('preHandler', fastify.auth_reject);
+        fastify.get('/connect', (req, rep)=>{
             let token = cryptoRandomString({length: 32, type: 'url-safe'});
             session_tokens[token] = true;
             setTimeout(()=>delete session_tokens[token], 5000); //delete in 5 seconds
             rep.send(options.prefix+'/'+token); //on-time-use connection url
-        }
+        });
     });
+    
     fastify.get('/:token', { websocket: true }, (conn, req, params) => {
         if(!session_tokens[params.token]){
             fastify.log.info("socket connection rejected!")
@@ -40,10 +27,10 @@ module.exports =  async function routes(fastify, options){
 
         fastify.log.info('new socket connection');
 
-        update_usercount(1);
+        let handle = camera.create_handle(data=>conn.socket.send(data, {binary:true, compress:false}), true);
         conn.socket.on('close', ()=>{
             fastify.log.info('socket disconnected');
-            update_usercount(-1);
+            handle.delete();
         });
 
         conn.socket.send(JSON.stringify(camera.size));

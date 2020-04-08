@@ -16,40 +16,13 @@ module.exports =  fp(async function routes(fastify, options){
         reply.sendFile('login.html');
     });
 
-    
-
-    //in memory database (bad) but I won't have thousands of clients at once plus it is faster.
     const UserCredentials = require('./UserCredentials.json');
-    const session_expire_time = 0.5*60e3; //0.5min
-    let active_sessions = {};
-    active_sessions.add = (id, name)=>{
-        this[id] = {
-            name:name,
-            last_acted:Date.now(),
-        };
-    };
-    active_sessions.check = (id)=>{
-        if(!this[id])return false;
-        if( Date.now() - this[id].last_acted > session_expire_time ){
-            delete this[id];
-            return false;
-        }else{
-            this[id].last_acted = Date.now();
-            return this[id].name;
-        }
-    }
 
-    fastify.decorate('active_sessions', active_sessions);
     fastify.decorate('auth_redirect', async (req, rep)=>{
-        return active_sessions.check(req.session.sessionId) ? null : rep.redirect('/login');
+        return req.session.authenticated ? null : rep.redirect('/login');
     });
     fastify.decorate('auth_reject', async (req, rep)=>{
-        return active_sessions.check(req.session.sessionId) ? null : rep.redirect(403);
-    });
-
-    fastify.post('/session/bump', async (req, rep)=>{
-        active_sessions.check(req.session.sessionId);
-        rep.code(200); //OK
+        return req.session.authenticated ? null : rep.redirect(403);
     });
 
     fastify.post('/auth', async (req, reply) => {
@@ -58,7 +31,7 @@ module.exports =  fp(async function routes(fastify, options){
         if(req.body.username && req.body.password){
             if(UserCredentials[req.body.username] && UserCredentials[req.body.username].pwd === req.body.password){
                 req.session.user = {name:req.body.username};
-                active_sessions.add(req.session.sessionId, req.body.username); 
+                req.session.authenticated = true;
                 reply.redirect('/');
             }else{
                 reply.redirect(403);
@@ -69,6 +42,7 @@ module.exports =  fp(async function routes(fastify, options){
     })
 },{
     decorators:[
-        'authenticate'
+        'auth_redirect',
+        'auth_reject'
     ]
 });

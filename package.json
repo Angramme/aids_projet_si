@@ -3,11 +3,11 @@
   "config": {
     "debug": true,
     "stream": true,
+    "headless": false,
 
     "camera_backend": "opencv",
     "camera_fps": 24,
     "camera_opencv_driver": "CAP_DSHOW",
-    "camera_opencv_headless": false,
 
     "is_raspberry":false,
     "servo1_pin":"GPIO19",

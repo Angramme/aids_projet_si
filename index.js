@@ -7,6 +7,10 @@ const fastify = require('fastify')({
 });
 
 
+//authentication routes
+fastify.register(require('./login.js'));
+
+
 //streaming routes
 if(config.stream)
 fastify.register(require('./stream.js'),{
@@ -21,9 +25,6 @@ fastify.register(require('fastify-static'), {
   prefix: '/public/',
 });
 
-
-//authentication routes
-fastify.register(require('./login.js'));
 
 fastify.register(async (fastify)=>{
   fastify.addHook('preHandler', fastify.auth_redirect);
