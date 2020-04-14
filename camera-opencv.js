@@ -5,13 +5,32 @@ const FPS = config.camera_fps;
 delete config;
 
 const cv = require('opencv4nodejs');
-const cam = new cv.VideoCapture(cv[DRIVER] | 0);
+let cam = null;
 
 let paused = true;
 let intervalID = null;
 let handles = [];
 let onframe_encoded = [];
 let onframe_raw = [];
+
+
+const streamnow = v=>{
+    if(v && paused){
+        cam = new cv.VideoCapture(cv[DRIVER] | 0);
+        paused = false;
+        intervalID = setInterval(loop, 1000/FPS) //24 fps
+    }else if(!v && !paused){
+        paused = true;
+        if(!intervalID)throw new Error("intervalID not defined!!!");
+        clearInterval(intervalID);
+        cam.release();
+        delete cam;
+    }
+};
+require('./cleanup.js').bind(()=>{
+    streamnow(false);
+    cv.destroyAllWindows();
+});
 
 function loop(){
     const frame = cam.read();
@@ -36,29 +55,12 @@ function loop(){
     }
 }
 
-/*
-module.exports.onframe = broadcast=>{
-    broadcast_func = broadcast;
-};
-*/
-
 Object.defineProperty(module.exports, 'size', {
     get: ()=>({
         width:cam.get(cv.CAP_PROP_FRAME_WIDTH),
         height:cam.get(cv.CAP_PROP_FRAME_HEIGHT),
     })
 });
-
-const streamnow = v=>{
-    if(v && paused){
-        paused = false;
-        intervalID = setInterval(loop, 1000/FPS) //24 fps
-    }else if(!v && !paused){
-        paused = true;
-        if(!intervalID)throw new Error("intervalID not defined!!!");
-        clearInterval(intervalID);
-    }
-};
 
 module.exports.create_handle = (onframe, encode)=>{
     let obj = {
@@ -80,24 +82,3 @@ module.exports.create_handle = (onframe, encode)=>{
 
     return obj;
 }
-
-
-
-function cleanup(){
-    //module.exports.streamnow(false);
-    streamnow(false);
-    cam.release();
-    cv.destroyAllWindows();
-    process.exit();
-}
-process.on('exit', cleanup.bind(null,{cleanup:true}));
-//catches ctrl+c event
-process.on('SIGINT', cleanup.bind(null, {exit:true}));
-// catches "kill pid" (for example: nodemon restart)
-process.on('SIGUSR1', cleanup.bind(null, {exit:true}));
-process.on('SIGUSR2', cleanup.bind(null, {exit:true}));
-//catches uncaught exceptions
-process.on('uncaughtException', (err, origin) => {
-    console.error("ERROR at: ", origin, " : \n", err);
-    cleanup();
-});

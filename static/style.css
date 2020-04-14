@@ -9,6 +9,8 @@ body{
 
     background-image: url("/public/background.png");
     background-repeat: repeat;
+
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 #cancon{
@@ -25,6 +27,7 @@ body{
 }
 #vidcan{
     width:100%;
+    cursor: move;
 
     position: absolute;
     top: 50%;
@@ -33,4 +36,31 @@ body{
     -webkit-box-shadow: 1px 8px 84px -18px rgba(0,0,0,0.87);
     -moz-box-shadow: 1px 8px 84px -18px rgba(0,0,0,0.87);
     box-shadow: 1px 8px 84px -18px rgba(0,0,0,0.87);
+}
+
+#playbackmode{
+    position: absolute;
+    left: 5px;
+    top: 10px;
+    color:white;
+    cursor: pointer;
+}
+#playbackmode div{
+    display: inline;;
+    padding: 5px;
+    background: gray;
+}
+#playbackmode div.leftbutton{
+    border-radius: 5px 0 0 5px;
+    background-color: orangered;
+}
+#playbackmode div.rightbutton{
+    border-radius: 0 5px 5px 0;
+}
+
+#playbackmode:hover div, #playbackmode:hover div.leftbutton{
+    background-color: gray;
+}
+#playbackmode:hover div.rightbutton{
+    background-color: indianred;
 }

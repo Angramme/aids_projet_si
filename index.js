@@ -12,10 +12,16 @@ fastify.register(require('./login.js'));
 
 
 //streaming routes
+if(config.stream||config.record)
+fastify.register(require('fastify-websocket'));
+
 if(config.stream)
 fastify.register(require('./stream.js'),{
-  prefix:'/ws',
-  camera_backend:config.camera_backend
+  prefix:'/ws/live',
+});
+
+fastify.register(require('./playback.js'),{
+  prefix:'/ws/playback',
 });
 
 

@@ -3,11 +3,14 @@
   "config": {
     "debug": true,
     "stream": true,
-    "headless": false,
+    "record": false,
+    "headless": true,
 
     "camera_backend": "opencv",
     "camera_fps": 24,
     "camera_opencv_driver": "CAP_DSHOW",
+
+    "record_directory":"records",
 
     "is_raspberry":false,
     "servo1_pin":"GPIO19",
