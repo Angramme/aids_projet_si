@@ -213,6 +213,8 @@ CAN.addEventListener('mousedown', ()=>{
     if(!is_live_mode)return;
     //p1 = relmouseN(CAN);
     let int = setInterval(()=>{
+        if(!is_live_mode) return;
+        
         let p2 = relmouseN(CAN);
         fetch('/cam/rotate-by', {
             method: 'POST',
