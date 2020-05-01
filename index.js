@@ -24,6 +24,10 @@ fastify.register(require('./playback.js'),{
   prefix:'/ws/playback',
 });
 
+fastify.register(require('./auto-follow.js'),{
+  prefix:'/auto',
+});
+
 
 //static 
 fastify.register(require('fastify-static'), {

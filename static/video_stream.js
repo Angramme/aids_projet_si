@@ -141,6 +141,38 @@ record_checkbox.addEventListener("change", e=>{
 })
 update_record_checkbox();
 
+const auto_follow_checkbox = document.getElementById('autofollowcheckbox');
+const update_auto_follow_checkbox = ()=>{
+    fetch('/auto/follow')
+    .then(res=>{
+        if(!res.ok)
+            alert('ERROR: You are not logged in!');
+        return res.text();
+    })
+    .then(txt=>{
+        auto_follow_checkbox.checked = txt == "true";
+    })
+};
+auto_follow_checkbox.addEventListener('change', e=>{
+    const follnow = auto_follow_checkbox.checked;
+    fetch('/auto/follow', {
+        method: 'POST',
+        mode: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        redirect: 'error', // manual, *follow, error
+        body: JSON.stringify({
+            follow: follnow
+        })
+    })
+    .then(update_auto_follow_checkbox)
+    .catch(err=>{
+        console.error('cannot set auto-follow state!: ', err);
+    });
+});
+update_auto_follow_checkbox();
+
 const open_archive_button = document.getElementById("openarchive");
 const archive_window = document.getElementById("archivewindow");
 const open_archive_window = ()=>{
