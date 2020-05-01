@@ -5,7 +5,7 @@
     "stream": true,
     "record": false,
     "headless": true,
-    "skip_auth":true,
+    "skip_auth":false,
 
     "camera_backend": "opencv",
     "camera_fps": 24,
