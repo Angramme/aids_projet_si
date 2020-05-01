@@ -128,7 +128,7 @@ body{
 .information{
     margin: 10px 0 10px 0;
     padding: 5px;
-    color: darkgray;
+    color: darkgray !important;
     background-color: black;
     font-size: x-small;
     display: block;
@@ -145,4 +145,33 @@ body{
 }
 .information:hover p{
     display: inline;
+}
+
+#archivewindow{
+    overflow-y: scroll;
+    overflow-x: hidden;
+
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    width: 30em;
+    height: 80vh;
+    font-size: small;
+    background-color: white;
+    padding: 10px;
+
+    display: none;
+    
+    -webkit-box-shadow: 1px 8px 84px -18px rgba(0,0,0,0.87);
+    -moz-box-shadow: 1px 8px 84px -18px rgba(0,0,0,0.87);
+    box-shadow: 1px 8px 84px -18px rgba(0,0,0,0.87);
+}
+#archivewindow p{
+    cursor: pointer;   
+}
+#archivewindow p:hover{
+    color:blue;
 }

@@ -70,7 +70,7 @@ let currentWS = setupCommunication('live');
 
 let is_live_mode = true;
 const switch_playback_button = document.getElementById("playbackmodebuttons");
-switch_playback_button.addEventListener("click", ()=>{
+const switch_playback_mode_now = ()=>{
     is_live_mode = !is_live_mode;
     switch_playback_button.getElementsByClassName("leftbutton")[0].textContent = is_live_mode ? "live" : "playback";
     switch_playback_button.getElementsByClassName("rightbutton")[0].textContent = is_live_mode ? "playback" : "live";
@@ -80,7 +80,8 @@ switch_playback_button.addEventListener("click", ()=>{
     currentWS = currentWS
     .then(ws=>ws.close())
     .then(()=>setupCommunication(is_live_mode ? 'live' : 'playback'));
-});
+};
+switch_playback_button.addEventListener("click", switch_playback_mode_now);
 
 const pause_playback_button = document.getElementById("pauseplaybackbutton");
 pause_playback_button.addEventListener("click", ()=>{
@@ -139,6 +140,41 @@ record_checkbox.addEventListener("change", e=>{
     });
 })
 update_record_checkbox();
+
+const open_archive_button = document.getElementById("openarchive");
+const archive_window = document.getElementById("archivewindow");
+const open_archive_window = ()=>{
+    archive_window.innerText = "";
+    archive_window.style.display = "block";
+
+    if(is_live_mode) switch_playback_mode_now();
+
+    fetch("/ws/playback/archive")
+    .then(res=>{
+        if(!res.ok)
+            alert('ERROR: You are not logged in!');
+        return res.json();
+    })
+    .then(json=>json.timestamps)
+    .then(list=>{
+        list.splice(0, 1);
+        for(let ts of list){
+            let p = document.createElement("p");
+            p.textContent = new Date(ts).toLocaleString();
+            p.timestamp = ts;
+            p.classList.add("timestamp_link");
+            archive_window.appendChild(p);
+        }
+        window.addEventListener("click", e=>{
+            archive_window.style.display = "none";
+            if(e.target.classList.contains("timestamp_link")){
+                currentWS.then(ws=>ws.send(JSON.stringify({type:"go-to-timestamp", 
+                    timestamp: Number(e.target.timestamp)})));
+            }
+        }, {once:true});
+    })
+};
+open_archive_button.addEventListener("click", open_archive_window);
 
 
 CAN.addEventListener('mousedown', ()=>{

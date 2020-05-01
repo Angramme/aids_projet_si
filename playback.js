@@ -37,6 +37,8 @@ const binarySearchLeftBoundIndex = (array, target) => {
     return beg;
 }
 
+
+//YES I KNOW I SHOULD USE A DATABASE BUT I DONT CARE
 const RecordsArchive = new (class RecordsArchive{
     constructor(directory){
         this.directory = directory;
@@ -263,6 +265,11 @@ module.exports =  async function routes(fastify, options){
     });
     fastify.get('/record', (req, rep)=>{
         rep.send(recording_now ? "true" : "false");
+    });
+    fastify.get("/archive", (req, rep)=>{
+        rep.send({
+            timestamps: RecordsArchive.video_filenames
+        });
     });
 
     

@@ -29,13 +29,13 @@
         <div id="playbackinfo">
             <div class="information">
                 <span class="iconify" data-icon="fa-solid:info-circle" data-inline="false"></span>
-                <p> pour entrer une valeur du temps, mettez vous en mode "playback" puis en pause... </p>
+                <p> pour entrer une valeur du temps, mettez vous en mode "playback"... </p>
             </div>   
             <input type="date" id="playbackdate"></input>
             <input type="time" id="playbacktime"></input> 
             <div id="openarchive">
-                <span class="iconify" data-icon="octicon-archive" data-inline="false"></span>
-                open archive...</div>
+                <span class="iconify" data-icon="vaadin:records" data-inline="false"></span>
+                ouvre l'archive...</div>
         </div>
         <div id="playbackcontrols">
             <div id="jumpbackplaybackbutton">&#9664;&#9664;</div>
@@ -44,9 +44,27 @@
         </div>
 
         <div id="preferences">
-            <div><input id="recordcheckbox" type="checkbox">enregistre</input></div>
-            <div><input type="checkbox">auto-follow</input></div>
-            <div><input type="checkbox">caché</input></div>
+            <div><input id="recordcheckbox" type="checkbox">
+                <span class="iconify" data-icon="bx:bx-video-recording" data-inline="false"></span>
+                enregistre</input></div>
+            <div><input type="checkbox">
+                <span class="iconify" data-icon="ant-design:robot-outlined" data-inline="false"></span>                auto-follow</input></div>
+            <div><input type="checkbox">
+                <span class="iconify" data-icon="bx:bx-hide" data-inline="false"></span>
+                caché</input></div>
+
+            <div class="information">
+                <span class="iconify" data-icon="fa-solid:info-circle" data-inline="false"></span>
+                <p>
+                    - "enregistre" : enregistrer la video de la camera en temps réel. <br/>
+                    - "auto-follow" : mettre la camera en mode suivie de personnes sur image. <br/>
+                    - "caché" : cacher / activer la caméra.
+                </p>
+            </div>  
+        </div>
+
+        <div id="archivewindow">
+            
         </div>
 
         <script src="/public/mouse_track.js"></script>
