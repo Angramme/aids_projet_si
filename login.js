@@ -1,5 +1,6 @@
 const fp = require('fastify-plugin');
 const cryptoRandomString = require('crypto-random-string');
+const SKIP_LOGIN = require('./package.json').config.skip_auth;
 
 module.exports =  fp(async function routes(fastify, options){
 
@@ -12,8 +13,13 @@ module.exports =  fp(async function routes(fastify, options){
         },
     });
 
-    fastify.get('/login', (request, reply)=>{
+    fastify.get('/login', !SKIP_LOGIN ? 
+    (request, reply)=>{
         reply.sendFile('login.html');
+    } : 
+    (re, rp)=>{
+        re.session.authenticated = true;
+        rp.redirect('/');
     });
 
     const UserCredentials = require('./UserCredentials.json');

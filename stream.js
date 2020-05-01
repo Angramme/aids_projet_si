@@ -25,7 +25,10 @@ module.exports =  async function routes(fastify, options){
         }
         delete session_tokens[params.token];
         fastify.log.info('live - new socket connection');
-        let handle = camera.create_handle(data=>conn.socket.send(data, {binary:true, compress:false}), true);
+        let handle = camera.create_handle(data=>{
+            conn.socket.send(data, {binary:true, compress:false});
+            conn.socket.send(JSON.stringify({vts:Date.now()}));
+        }, true);
         conn.socket.on('close', ()=>{
             fastify.log.info('live - socket disconnected');
             handle.delete();

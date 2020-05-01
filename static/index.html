@@ -4,6 +4,7 @@
         <title>AIDS-client v1.0</title>
         <link rel="stylesheet" href="/public/style.css">
         <link rel="icon" href="/public/icon.png">
+        <script src="/public/iconify.min.js"></script>
     </head>
     <body>
         <div id="cancon">
@@ -11,9 +12,41 @@
         </div>
 
         <div id="playbackmode">
-            <div class="leftbutton">live</div>
-            <div>&#8646;</div>
-            <div class="rightbutton">playback</div>
+            <div id="playbackmodebuttons">
+                <div class="leftbutton">live</div>
+                <div>&#8646;</div>
+                <div class="rightbutton">playback</div>
+            </div>
+            <div class="information">
+                <span class="iconify" data-icon="fa-solid:info-circle" data-inline="false"></span>
+                <p>
+                    - "live" : regarder l'image de la camera en temps réel. <br/>
+                    - "playback" : regarder des vidéos enregistres dans l'archive.
+                </p>
+            </div>   
+        </div>
+
+        <div id="playbackinfo">
+            <div class="information">
+                <span class="iconify" data-icon="fa-solid:info-circle" data-inline="false"></span>
+                <p> pour entrer une valeur du temps, mettez vous en mode "playback" puis en pause... </p>
+            </div>   
+            <input type="date" id="playbackdate"></input>
+            <input type="time" id="playbacktime"></input> 
+            <div id="openarchive">
+                <span class="iconify" data-icon="octicon-archive" data-inline="false"></span>
+                open archive...</div>
+        </div>
+        <div id="playbackcontrols">
+            <div id="jumpbackplaybackbutton">&#9664;&#9664;</div>
+            <div id="pauseplaybackbutton">&#10074;&#10074; &#9658;</div>
+            <div id="jumpfrontplaybackbutton">&#9658;&#9658;</div>
+        </div>
+
+        <div id="preferences">
+            <div><input id="recordcheckbox" type="checkbox">enregistre</input></div>
+            <div><input type="checkbox">auto-follow</input></div>
+            <div><input type="checkbox">caché</input></div>
         </div>
 
         <script src="/public/mouse_track.js"></script>

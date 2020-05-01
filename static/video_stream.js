@@ -3,6 +3,10 @@ const CTX = CAN.getContext('2d');
 let urlObject = null;
 let image = document.createElement('img');
 
+const date_input = document.getElementById("playbackdate");
+const hour_input = document.getElementById("playbacktime");
+let cvideo_time_ms = 0;
+
 function ui_loop(){
     CTX.drawImage(image, 0, 0);
     //ui_overlay(CTX);
@@ -37,9 +41,24 @@ const setupCommunication = mode=>connectToSocket(mode)
         CAN.height = cam.height;
         
         ws.addEventListener('message', event=>{
-            URL.revokeObjectURL(urlObject)
-            urlObject = URL.createObjectURL(new Blob([event.data]));
-            image.src = urlObject;
+            if(event.data instanceof Blob){
+                URL.revokeObjectURL(urlObject)
+                urlObject = URL.createObjectURL(event.data);
+                //urlObject = URL.createObjectURL(new Blob([event.data]));
+                image.src = urlObject;
+            }else{
+                try {
+                    const json = JSON.parse(event.data);
+                    if(json.vts){
+                        cvideo_time_ms = json.vts;
+                        const date = new Date(json.vts);
+                        date_input.valueAsDate = date;
+                        hour_input.value = date.toLocaleTimeString();
+                    }
+                } catch(err) {
+                    console.log('received invalid message from the server through ws:  ', event.data);
+                }
+            }
         });
     }, {once:true});
 
@@ -50,17 +69,76 @@ const setupCommunication = mode=>connectToSocket(mode)
 let currentWS = setupCommunication('live');
 
 let is_live_mode = true;
-const switch_playback_button = document.getElementById("playbackmode");
+const switch_playback_button = document.getElementById("playbackmodebuttons");
 switch_playback_button.addEventListener("click", ()=>{
     is_live_mode = !is_live_mode;
     switch_playback_button.getElementsByClassName("leftbutton")[0].textContent = is_live_mode ? "live" : "playback";
     switch_playback_button.getElementsByClassName("rightbutton")[0].textContent = is_live_mode ? "playback" : "live";
+    document.getElementById("playbackcontrols").style.bottom = is_live_mode ? '-40px' : '5px';
+    document.getElementById("playbackinfo").style.bottom = is_live_mode ? '5px' : '40px';
 
     currentWS = currentWS
     .then(ws=>ws.close())
     .then(()=>setupCommunication(is_live_mode ? 'live' : 'playback'));
 });
 
+const pause_playback_button = document.getElementById("pauseplaybackbutton");
+pause_playback_button.addEventListener("click", ()=>{
+    currentWS.then(ws=>ws.send(JSON.stringify({type:"pause-toggle"})));
+});
+const jumpback_playback_button = document.getElementById("jumpbackplaybackbutton");
+jumpback_playback_button.addEventListener("click", ()=>{
+    currentWS.then(ws=>ws.send(JSON.stringify({type:"go-to-timestamp", timestamp:cvideo_time_ms-5000})));
+});
+const jumpforward_playback_button = document.getElementById("jumpfrontplaybackbutton");
+jumpforward_playback_button.addEventListener("click", ()=>{
+    currentWS.then(ws=>ws.send(JSON.stringify({type:"go-to-timestamp", timestamp:cvideo_time_ms+5000})));
+});
+
+const date_hour_change_listener = e=>{
+    const ts = new Date(date_input.value + ' ' + hour_input.value).getTime();
+    currentWS.then(ws=>ws.send(JSON.stringify({type:"go-to-timestamp", timestamp:ts})));
+};
+date_input.addEventListener('change', date_hour_change_listener);
+hour_input.addEventListener('change', date_hour_change_listener);
+
+const pause_now = e=>{
+    currentWS.then(ws=>ws.send(JSON.stringify({type:"pause-set", value:true})));
+};
+date_input.addEventListener('focus', pause_now);
+hour_input.addEventListener('focus', pause_now);
+
+const record_checkbox = document.getElementById("recordcheckbox");
+const update_record_checkbox = ()=>{
+    fetch('/ws/playback/record')
+    .then(res=>{
+        if(!res.ok)
+            alert('ERROR: You are not logged in!');
+        return res.text();
+    })
+    .then(txt=>{
+        record_checkbox.checked = txt == "true";
+    })
+};
+record_checkbox.addEventListener("change", e=>{
+    const recnow = record_checkbox.checked;
+    fetch('/ws/playback/record', {
+        method: 'POST',
+        mode: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        redirect: 'error', // manual, *follow, error
+        body: JSON.stringify({
+            record: recnow
+        })
+    })
+    .then(update_record_checkbox)
+    .catch(err=>{
+        console.error('cannot set recording state!: ', err);
+    });
+})
+update_record_checkbox();
 
 
 CAN.addEventListener('mousedown', ()=>{

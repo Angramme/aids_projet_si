@@ -55,12 +55,15 @@ function loop(){
     }
 }
 
-Object.defineProperty(module.exports, 'size', {
-    get: ()=>({
+(()=>{
+    cam = new cv.VideoCapture(cv[DRIVER] | 0);
+    module.exports.size = {
         width:cam.get(cv.CAP_PROP_FRAME_WIDTH),
         height:cam.get(cv.CAP_PROP_FRAME_HEIGHT),
-    })
-});
+    };
+    cam.release();
+    delete cam;
+})();
 
 module.exports.create_handle = (onframe, encode)=>{
     let obj = {

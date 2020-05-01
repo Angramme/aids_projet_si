@@ -22,19 +22,19 @@ function toFloat64Array(b) {
 }
 
 const binarySearchLeftBoundIndex = (array, target) => {
-    let left = 0;
-    let right = array.length - 1;
-    while(left < right) {
-        let middle = Math.floor((left + right) / 2);
-        if(target == array[middle]) return middle;
+    if(array[0] > target) return -1;
+    let beg = 0; 
+    let end = array.length;
 
-        if(target > array[middle]) {
-            left = middle + 1;
-        }else if(target < array[middle]) {
-            right = middle - 1;
+    while (end - beg >  1) {
+        let mid = Math.floor((end + beg) / 2);
+        if (array[mid] <= target) {
+            beg = mid;
+        } else { 
+            end = mid;
         }
     }
-    return left;
+    return beg;
 }
 
 const RecordsArchive = new (class RecordsArchive{
@@ -87,23 +87,38 @@ class VideoStreamer{
     constructor(onframe, timestamp){
         ActiveVideoStreamers.push(this);
         this.onframe = onframe;
+        this.setFPS(config.camera_fps);
+
         this.go_to_timestamp(timestamp?timestamp : RecordsArchive.getByIndex(1));
         this.loop(true);
     }
     go_to_timestamp(timestamp){
+        console.log("["+Date.now()+"] going to timestamp: ", timestamp);
+
         this._video2_index = RecordsArchive.getFileIndex(timestamp);
+        //video list starts with 0
+        if(this._video2_index <= 0) this._video2_index = 1;
         this._video2 = RecordsArchive.getByIndex(this._video2_index);
         if(this._video2){
             this._video2_player = this.createVideoPlayer(this._video2);
             this.next_video();
-        }
+        }else{return;}
+        
+        const length = this._video1_player.get(cv.CAP_PROP_FRAME_COUNT);
+        const vid_end = this._video1 + length * this._frame_duration_ms;
+        const target_index = Math.floor((timestamp - this._video1)/this._frame_duration_ms);
+        this._video1_player.set(cv.CAP_PROP_POS_FRAMES, Math.min(target_index, vid_end));
+        if(this._paused) this._loop(); //if paused then send one frame to user
     }
     next_video(){
         this._video1 = this._video2;
         this._video1_player = this._video2_player;
+        const nFPS = this._video1_player.get(cv.CAP_PROP_FPS);
+        this.setFPS(nFPS);
+
         this._video2_index++;
         this._video2 = RecordsArchive.getByIndex(this._video2_index);
-        this._video2_player = this.createVideoPlayer(this._video2);
+        this._video2_player = this._video2 ? this.createVideoPlayer(this._video2) : null;
     }
     createVideoPlayer(name){
         const filepath = RecordsArchive.getFilePath(name);
@@ -119,10 +134,14 @@ class VideoStreamer{
     }
     _loop(){
         if(!this._video1_player && this._video2_player) this.next_video();
-        if(!this._video2_player) return;
+        if(!this._video1_player && !this._video2_player) return;
 
         let frame = this._video1_player.read();
-        if(!frame){
+        if(frame.empty){
+            if(!this._video2_player){
+                console.log("end of video!");
+                return this.loop(false);
+            }
             this.next_video();
             frame = this._video1_player.read();
         }
@@ -131,17 +150,28 @@ class VideoStreamer{
             ".webp", 
             frame, 
             [cv.IMWRITE_WEBP_QUALITY, 70]);
-        this.onframe(buff);
+        this.onframe(buff, this._video1_player.get(cv.CAP_PROP_POS_FRAMES)*this._frame_duration_ms + this._video1);
     }
     loop(v){
         if(v){
             if(this.interval) clearInterval(this.interval);
-            this.interval = setInterval(this._loop.bind(this), 1000/config.camera_fps);
+            this.interval = setInterval(this._loop.bind(this), this._frame_duration_ms);
             this._paused = false;
         }else if(!v){
-            clearInterval(this.interval);
+            if(this.interval) clearInterval(this.interval);
             this._paused = true;
         }
+    }
+    togglepause(){
+        this.loop(this._paused);
+    }
+    setFPS(fps){
+        if(fps == this._mFPS) return;
+        const p = !this._paused;
+        if(p)this.loop(false);
+        this._mFPS = fps;
+        this._frame_duration_ms = 1000/this._mFPS;
+        if(p)this.loop(true);
     }
 }
 require('./cleanup.js').bind(()=>{
@@ -159,6 +189,7 @@ const camera = require(`./camera-${camera_backend}.js`);
 let video_output = null;
 let handle = null;
 let timeout = null;
+let recording_now = false;
 function record(v, timeout_caused=false){
     if(v){
         let timestamp = Date.now();
@@ -178,6 +209,8 @@ function record(v, timeout_caused=false){
         timeout = setTimeout(()=>{
             record(false, true);
         }, VIDEO_MAXLENGTH);
+
+        recording_now = true;
     }else{
         if(video_output){ //if isn't deleted already
             video_output.release();
@@ -196,6 +229,8 @@ function record(v, timeout_caused=false){
         }else{
             record(true, true);
         }
+
+        recording_now = false;
     }
 }
 require('./cleanup.js').bind(()=>{
@@ -226,6 +261,9 @@ module.exports =  async function routes(fastify, options){
         record(req.body.record);
         rep.redirect(200);
     });
+    fastify.get('/record', (req, rep)=>{
+        rep.send(recording_now ? "true" : "false");
+    });
 
     
     fastify.get('/:token', { websocket: true }, (conn, req, params) => {
@@ -235,10 +273,25 @@ module.exports =  async function routes(fastify, options){
         }
         delete session_tokens[params.token];
         fastify.log.info('playback - new socket connection');
-        let streamer = new VideoStreamer(buff=>conn.socket.send(buff, {binary:true, compress:false}));
+
+        conn.socket.send(JSON.stringify(camera.size));
+
+        let streamer = new VideoStreamer((buff, ts)=>{
+            conn.socket.send(buff, {binary:true, compress:false});
+            conn.socket.send(JSON.stringify({vts:ts}));
+        });
         conn.socket.on('message', e=>{
-            let msg = e.data;
-            if(msg.type == "go-to-timestamp") streamer.go_to_timestamp(msg.timestamp);
+            try{
+                const json = JSON.parse(e);
+                if(json.type == "go-to-timestamp")streamer.go_to_timestamp(json.timestamp);
+                else if(json.type == "pause-toggle") streamer.togglepause();
+                else if(json.type == "pause-set") streamer.loop(!json.value);
+                else{
+                    fastify.log.error("received invalid message", json);
+                }
+            }catch(err){
+                fastify.log.error("received invalid message", err);
+            }
         });
         conn.socket.on('close', ()=>{
             fastify.log.info('playback - socket disconnected');

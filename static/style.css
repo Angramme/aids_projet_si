@@ -1,6 +1,7 @@
 body{
     margin:0;
     padding: 0;
+    overflow: hidden;
 
     width:100vw;
     height: 100vh;
@@ -43,24 +44,105 @@ body{
     left: 5px;
     top: 10px;
     color:white;
+}
+#playbackmodebuttons div{
+    display: inline;
+    padding: 5px;
+    background: black;
     cursor: pointer;
 }
-#playbackmode div{
-    display: inline;;
-    padding: 5px;
-    background: gray;
-}
-#playbackmode div.leftbutton{
+#playbackmodebuttons div.leftbutton{
     border-radius: 5px 0 0 5px;
     background-color: orangered;
 }
-#playbackmode div.rightbutton{
+#playbackmodebuttons div.rightbutton{
     border-radius: 0 5px 5px 0;
 }
 
-#playbackmode:hover div, #playbackmode:hover div.leftbutton{
-    background-color: gray;
+#playbackmodebuttons:hover div, #playbackmodebuttons:hover div.leftbutton{
+    background-color: black;
 }
-#playbackmode:hover div.rightbutton{
+#playbackmodebuttons:hover div.rightbutton{
     background-color: indianred;
+}
+
+
+#playbackcontrols{
+    position: absolute;
+    bottom: -40px;
+    left: 5px;
+    margin: auto 0;
+    color: white;
+    transition: bottom ease-in-out 0.5s;
+}
+#playbackcontrols div{
+    display: inline;
+    margin: 0 0px;
+    padding: 2px;
+    background-color: black;
+    cursor: pointer;
+}
+#playbackcontrols div:hover{
+    background-color: cornflowerblue;
+    user-select: none;
+}
+
+#playbackinfo{
+    position: absolute;
+    left: 5px;
+    bottom: 5px;
+    transition: bottom ease-in-out 0.5s;
+}
+#playbackinfo input{
+    display: block;
+    background: white;
+    border: none;
+    color: black;
+}
+#playbackinfo #openarchive{
+    font-size: small;
+    color: white;
+    background-color: black;
+    padding: 5px;
+    cursor: pointer;
+    user-select: none;
+}
+#playbackinfo #openarchive:hover{
+    background-color: cornflowerblue;
+}
+
+
+#preferences{
+    position: absolute;
+    top: 5px;
+    right: 15px;
+    font-size: small;
+}
+#preferences div{
+    background: black;
+    color: white;
+    padding: 5px;
+    margin: 5px 0;
+}
+
+.information{
+    margin: 10px 0 10px 0;
+    padding: 5px;
+    color: darkgray;
+    background-color: black;
+    font-size: x-small;
+    display: block;
+    overflow: hidden;
+    width: 1em;
+    height: 1em;
+}
+.information p{
+    display: none;
+}
+.information:hover{
+    width: 10em;
+    height: auto;
+}
+.information:hover p{
+    display: inline;
 }
