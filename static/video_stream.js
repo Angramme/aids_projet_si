@@ -7,12 +7,15 @@ const date_input = document.getElementById("playbackdate");
 const hour_input = document.getElementById("playbacktime");
 let cvideo_time_ms = 0;
 
-function ui_loop(){
+// function ui_loop(){
+//     CTX.drawImage(image, 0, 0);
+//     //ui_overlay(CTX);
+//     requestAnimationFrame(ui_loop);
+// }
+// ui_loop();
+image.addEventListener('load', ()=>{
     CTX.drawImage(image, 0, 0);
-    //ui_overlay(CTX);
-    requestAnimationFrame(ui_loop);
-}
-ui_loop();
+})
 
 
 function connectToSocket(type){
