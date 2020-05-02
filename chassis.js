@@ -2,7 +2,23 @@ function clamp(x, min, max){
     return x < min ? min : (x > max ? max : x);
 }
 
-class MotionController{
+
+class MotionControllerSimple{
+    constructor(){
+        this.target = 0;
+    }
+    go_to(nx){
+        this.target = clamp(nx, 0, 6.28318);
+    }
+    move_by(nx){
+        this.target = clamp(this.target + nx, 0, 6.28318);
+    }
+    update(dt){
+        //pass
+    }
+}
+
+class MotionControllerComplex{
     constructor(){
         this.x = 0;
         this.s = 0;
@@ -45,10 +61,16 @@ class MotionController{
     }
 }
 
-const aspect_ratio = 480/640;
-const FOV_horizontal = 60;
+const camera = require('./camera-opencv.js');
+const aspect_ratio = camera.size.height / camera.size.width;
+const FOV_horizontal = 60 *3.14159265359 /180; //in radians
 const FOV_vertical = FOV_horizontal * aspect_ratio;
 
+const use_complex_controller = 
+    require('./package.json').config.complex_chassis_controller;
+const MotionController = use_complex_controller ? 
+    MotionControllerComplex :
+    MotionControllerSimple;
 let motor_a = new MotionController();
 let motor_b = new MotionController();
 

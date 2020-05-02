@@ -10,6 +10,7 @@
     "camera_backend": "opencv",
     "camera_fps": 24,
     "camera_opencv_driver": "CAP_DSHOW",
+    "complex_chassis_controller":true,
 
     "record_directory":"records",
 
