@@ -5,13 +5,13 @@ function clamp(x, min, max){
 
 class MotionControllerSimple{
     constructor(){
-        this.target = 0;
+        this.x = 0;
     }
     go_to(nx){
-        this.target = clamp(nx, 0, 6.28318);
+        this.x = clamp(nx, 0, 6.28318);
     }
     move_by(nx){
-        this.target = clamp(this.target + nx, 0, 6.28318);
+        this.x = clamp(this.x + nx, 0, 6.28318);
     }
     update(dt){
         //pass
@@ -61,8 +61,8 @@ class MotionControllerComplex{
     }
 }
 
-const camera = require('./camera-opencv.js');
-const aspect_ratio = camera.size.height / camera.size.width;
+const camera_size = require('./camera-opencv.js').size;
+const aspect_ratio = camera_size.height / camera_size.width;
 const FOV_horizontal = 60 *3.14159265359 /180; //in radians
 const FOV_vertical = FOV_horizontal * aspect_ratio;
 
@@ -104,17 +104,20 @@ if(config.is_raspberry){
     let pwm_b = null;
     
     function update(){
-        motor_a.update(100);
-        motor_b.update(100);
+        motor_a.update(0.1); //dt in s
+        motor_b.update(0.1);
     
         pwm_a.write(motor_a.x/6.28318);
         pwm_b.write(motor_b.x/6.28318);
+        
+        setTimeout(update, 100);
     }
     
     raspi.init(() => {
         pwm_a = new pwm.PWM(config.servo1_pin);
         pwm_b = new pwm.PWM(config.servo2_pin);
-        setInterval(update, 100);
+        // setInterval(update, 100);
+        update();
     });
 }
     
