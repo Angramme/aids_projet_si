@@ -13,12 +13,6 @@ function scan_video (frame){
         frame.cols*scale, frame.rows*scale));
         
     let rects = classifier.detectMultiScale(frame).objects;
-        
-    /*for(let box of rects){
-        cv.drawDetection(frame, box);
-    }
-    cv.imshow("test", frame);
-    cv.waitKey(1);*/
 
     if(rects.length > 0){
         const box = rects[0];
@@ -27,6 +21,13 @@ function scan_video (frame){
             (box.y+box.height*0.5)/frame.rows-0.5
             );
     }
+
+    
+    // for(let box of rects){
+    //     cv.drawDetection(frame, box);
+    // }
+    // cv.imshow("test", frame);
+    // cv.waitKey(1);
 }
 
 let handle = null;
